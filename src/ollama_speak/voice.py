@@ -1,6 +1,7 @@
 """
 Core voice engine for ollama-speak.
 Provides script-aware multilingual text-to-speech with cross-platform native playback.
+Works out of the box on any device (Linux, macOS, Windows) without assuming specific hardware or local daemons.
 """
 
 import os
@@ -202,7 +203,32 @@ def synthesize_and_speak(
                 os.remove(save_path)
             except OSError:
                 pass
-            return played
+            if played:
+                return True
+            # If no media player succeeded on Linux/macOS/Windows, fall back to native OS speech
+            if sys.platform == "darwin" and shutil.which("say"):
+                subprocess.run(["say", clean], check=False)
+                return True
+            elif sys.platform == "win32":
+                escaped = clean.replace('"', '""').replace("'", "''")
+                ps_cmd = (
+                    f"Add-Type -AssemblyName System.Speech; "
+                    f"$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+                    f"$synth.Speak('{escaped}')"
+                )
+                subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], check=False)
+                return True
+            elif sys.platform.startswith("linux"):
+                if shutil.which("espeak-ng"):
+                    subprocess.run(["espeak-ng", clean], check=False)
+                    return True
+                elif shutil.which("espeak"):
+                    subprocess.run(["espeak", clean], check=False)
+                    return True
+                else:
+                    print("[!] Note: No audio player found to play sound on Linux. Please install mpv: sudo apt install mpv (or ffmpeg)", file=sys.stderr)
+                    return False
+            return False
         else:
             return os.path.exists(save_path) and os.path.getsize(save_path) > 100
     except Exception as e:
