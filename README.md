@@ -19,17 +19,14 @@
   - **Chinese / Japanese / Korean:** `zh-CN-YunxiNeural`, `ja-JP-NanamiNeural`, `ko-KR-SunHiNeural`
   - **English / Latin:** Warm British Baritone (`en-GB-RyanNeural`) or American (`en-US-GuyNeural`)
   - **Spanish / French / German:** `es-ES-AlvaroNeural`, `fr-FR-HenriNeural`, `de-DE-ConradNeural`
-- **Unix Composable (STDIN Pipe):** Pipe text directly from any command or LLM CLI:
-  ```bash
-  ollama-web "Who won the Champions League?" | ollama-speak
-  ollama run llama3 "Tell me a joke" | ollama-speak
-  ```
+- **Unix Composable with Zero Text Loss:** Pipe text directly from any command or LLM CLI (`ollama run llama3 "..." | ollama-speak`). **Pipes never swallow your screen text**—`ollama-speak` automatically mirrors incoming text to your terminal so you can read, copy, and paste while listening!
+- **Zero-Flag Pairing with `ollama-web`:** When companion `ollama-speak` is installed, simply running `ollama-web "your question"` automatically streams the text on screen and speaks the summary aloud without requiring any flags or pipes!
 - **Native Cross-Platform Playback:** Uses pre-installed operating system audio tools:
   - **macOS:** Native `afplay`
   - **Windows:** Native PowerShell `WMPlayer.OCX` / `SoundPlayer`
   - **Linux:** Automatically cascades through `mpv`, `ffplay`, `mpg123`, `cvlc`, `pw-play`, and `paplay`
 - **Optional Local Acceleration:** Supports local offline Piper, Kokoro-82M, or `ai-say` when `--local` is specified.
-- **Save to File:** Export spoken audio directly to `.mp3` via `-o <file.mp3>`.
+- **Save to File:** Export spoken audio directly to standard directories (e.g. `-o ~/Music/summary.mp3`). Supports `~` home directory expansion.
 
 ---
 
@@ -87,12 +84,15 @@ ollama-speak "All systems are operational and ready for deployment."
 
 ---
 
-### Tutorial 2 — Piped Input from `ollama-web`
-Combine real-time internet search with spoken answers in a single pipeline:
+### Tutorial 2 — Zero-Swallow Piped Input
+When you pipe output from any command into `ollama-speak`, it mirrors the text directly to your terminal before playing audio, so your screen transcript is never lost:
 ```bash
-ollama-web "What is the latest score in today's football match?" | ollama-speak
+# Pipe from any Ollama model or shell command:
+ollama run llama3 "Explain quantum tunneling in two sentences" | ollama-speak
 ```
-`ollama-web` streams tokens to the screen while `ollama-speak` speaks the synthesized answer.
+The full answer prints on your screen in real time, and the voice begins speaking immediately!
+
+*(Note: With [`ollama-web`](https://github.com/AjarnSpencer/ollama-web), voice is already enabled by default—just run `ollama-web "your question"` without any pipe!)*
 
 ---
 

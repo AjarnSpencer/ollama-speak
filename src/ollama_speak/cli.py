@@ -3,6 +3,7 @@ Command-line interface for ollama-speak.
 Accepts text from arguments or STDIN pipes (e.g. `ollama-web "query" | ollama-speak`).
 """
 
+import os
 import sys
 import argparse
 from .voice import synthesize_and_speak, COMMON_VOICES, detect_voice_for_text
@@ -41,12 +42,17 @@ def main():
     # 2. Check STDIN pipe (e.g. ollama-web ... | ollama-speak)
     elif not sys.stdin.isatty():
         content = sys.stdin.read().strip()
+        # Always echo piped text to stdout so the human sees, reads, and can copy-paste it!
+        if content:
+            print(content, flush=True)
     else:
         parser.print_help()
         sys.exit(0)
 
     if not content:
         sys.exit(0)
+
+    output_path = os.path.expanduser(args.output) if args.output else None
 
     # Synthesize and speak
     success = synthesize_and_speak(
@@ -55,11 +61,11 @@ def main():
         rate=args.rate,
         pitch=args.pitch,
         local=args.local,
-        output_file=args.output
+        output_file=output_path
     )
 
-    if args.output and success:
-        print(f"✓ Saved audio to: {args.output}")
+    if output_path and success:
+        print(f"✓ Saved audio to: {output_path}")
 
 
 if __name__ == "__main__":
