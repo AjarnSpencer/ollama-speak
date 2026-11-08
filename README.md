@@ -25,8 +25,8 @@
   ollama run llama3 "Tell me a joke" | ollama-speak
   ```
 - **Native Cross-Platform Playback:** Uses pre-installed operating system audio tools:
-  - **macOS:** `afplay`
-  - **Windows:** PowerShell `WMPlayer.OCX` / `SoundPlayer`
+  - **macOS:** Native `afplay`
+  - **Windows:** Native PowerShell `WMPlayer.OCX` / `SoundPlayer`
   - **Linux:** Automatically cascades through `mpv`, `ffplay`, `mpg123`, `cvlc`, `pw-play`, and `paplay`
 - **Optional Local Acceleration:** Supports local offline Piper, Kokoro-82M, or `ai-say` when `--local` is specified.
 - **Save to File:** Export spoken audio directly to `.mp3` via `-o <file.mp3>`.
@@ -35,17 +35,17 @@
 
 ## 🚀 Quickstart and Installation
 
-### Option 1: Via PyPI
+### Option 1 — Via PyPI
 ```bash
 pip install --upgrade ollama-speak
 ```
 
-### Option 2: From GitHub
+### Option 2 — From GitHub
 ```bash
 pip install --upgrade git+https://github.com/AjarnSpencer/ollama-speak.git
 ```
 
-### Option 3: One-Line Installer Script
+### Option 3 — One-Line Installer Script
 **Linux & macOS:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AjarnSpencer/ollama-speak/main/install.sh | bash
@@ -58,43 +58,135 @@ irm https://raw.githubusercontent.com/AjarnSpencer/ollama-speak/main/install.ps1
 
 ---
 
-## 🖥️ CLI Usage Examples
+## 📖 Complete Command Line Reference and Flags
 
-### 1. Direct Text Narration
+`ollama-speak` can be invoked as either `ollama-speak` or `ospeak`.
+
+### Flags Table
+
+| Flag | Short | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `text` | | STDIN | Text string to speak (if omitted, reads streaming or piped input from STDIN) |
+| `--voice VOICE` | `-v` | Auto-detect | Specific voice name or short alias (`en-gb`, `th`, `ja`, `zh`, `es`, etc.) |
+| `--rate RATE` | `-r` | `+0%` | Speaking speed adjustment (e.g. `+15%`, `-10%`) |
+| `--pitch PITCH` | `-p` | `+0Hz` | Speaking pitch adjustment (e.g. `+5Hz`, `-5Hz`) |
+| `--local` | `-l` | `False` | Use local voice engine (Kokoro-82M, Piper, or `ai-say`) for Latin text |
+| `--output FILE` | `-o` | `None` | Save audio output to an `.mp3` file instead of playing aloud |
+| `--list-voices` | | | Print table of popular voice aliases and language codes |
+| `-h`, `--help` | | | Display full help manual and flag usage |
+
+---
+
+## 💡 Practical Tutorials and Workflows
+
+### Tutorial 1 — Direct Text Narration
+Speak any phrase directly from your terminal:
 ```bash
-ollama-speak "Welcome back. All systems are operational."
+ollama-speak "All systems are operational and ready for deployment."
 ```
 
-### 2. Piped Input from ollama-web
+---
+
+### Tutorial 2 — Piped Input from `ollama-web`
+Combine real-time internet search with spoken answers in a single pipeline:
 ```bash
-ollama-web "What is the capital of Thailand?" | ollama-speak
+ollama-web "What is the latest score in today's football match?" | ollama-speak
+```
+`ollama-web` streams tokens to the screen while `ollama-speak` speaks the synthesized answer.
+
+---
+
+### Tutorial 3 — Voice Companion for Local LLMs
+Turn any local Ollama model into a conversational voice assistant:
+```bash
+# Ask llama3 for a bedtime story and listen:
+ollama run llama3 "Tell me a short 3-sentence fable about a wise owl" | ollama-speak
+
+# Ask Mistral for advice:
+ollama run mistral "Give me one piece of life advice" | ollama-speak
 ```
 
-### 3. Piped Input from Ollama LLM
+---
+
+### Tutorial 4 — Multi-Language Script Routing
+`ollama-speak` automatically identifies language scripts without requiring manual flags:
 ```bash
-ollama run llama3 "Give me a 3-sentence inspirational quote" | ollama-speak
+# Automatic Thai detection (speaks in natural Thai via th-TH-NiwatNeural):
+ollama-speak "พระราชบัญญัติ สมุนไพรควบคุม กัญชา พ.ศ. 2568"
+
+# Automatic Japanese detection:
+ollama-speak "こんにちは、世界！"
+
+# Automatic Spanish detection:
+ollama-speak "Buenos días a todos. Bienvenidos a la conferencia."
+```
+To force a specific voice or alternate gender, pass `-v`:
+```bash
+# Thai female voice:
+ollama-speak -v th-female "สวัสดีค่ะ ยินดีต้อนรับค่ะ"
+
+# American English female voice:
+ollama-speak -v en-us-female "Good morning, how can I assist you today?"
 ```
 
-### 4. Specifying Voice or Language
+---
+
+### Tutorial 5 — Adjusting Speed and Pitch
+Fine-tune narration pacing for quick briefings or slower pronunciation:
 ```bash
-# Speak in Thai:
-ollama-speak -v th "พระราชบัญญัติ สมุนไพรควบคุม กัญชา พ.ศ. 2568"
+# 20% faster speech for fast news briefings:
+ollama-speak -r "+20%" "Breaking news: New developments in renewable energy announced today."
 
-# Speak in Japanese:
-ollama-speak -v ja "こんにちは、世界！"
+# 10% slower speech with a deeper pitch:
+ollama-speak -r "-10%" -p "-3Hz" "Please listen carefully to the following safety instructions."
+```
 
-# List popular voice aliases:
+---
+
+### Tutorial 6 — Saving Spoken Audio to MP3 Files
+Export audio directly to an `.mp3` file instead of playing through your speakers:
+```bash
+# Save an article summary to audio:
+ollama-web "Explain quantum computing in simple terms" | ollama-speak -o quantum_summary.mp3
+
+# Verify the file was written:
+ls -lh quantum_summary.mp3
+```
+
+---
+
+### Tutorial 7 — Local Offline Acceleration (`--local`)
+If you have local offline TTS tooling installed (such as Kokoro-82M, Piper, or an `ai-say` workstation wrapper) and want zero network calls for English text:
+```bash
+ollama-speak --local "Running completely offline using local workstation weights."
+```
+*Note: If Thai or Asian text is detected, `ollama-speak` automatically routes to native Edge-TTS to protect local English models from character spelling bugs (`tailaty`).*
+
+---
+
+### Tutorial 8 — Listing Voice Aliases
+To inspect common voice presets at a glance:
+```bash
 ollama-speak --list-voices
 ```
 
-### 5. Adjust Speed and Pitch
-```bash
-ollama-speak -r "+20%" "Reading at twenty percent higher speed."
-```
-
-### 6. Save Audio to MP3
-```bash
-ollama-speak -o summary.mp3 "Saving audio output to disk."
+Output:
+```text
+Popular Edge-TTS Voices and Aliases:
+------------------------------------------------------------------
+  en-gb           -> en-GB-RyanNeural
+  en-us           -> en-US-GuyNeural
+  en-us-female    -> en-US-JennyNeural
+  th              -> th-TH-NiwatNeural
+  th-female       -> th-TH-PremwadeeNeural
+  zh              -> zh-CN-YunxiNeural
+  ja              -> ja-JP-NanamiNeural
+  ko              -> ko-KR-SunHiNeural
+  es              -> es-ES-AlvaroNeural
+  fr              -> fr-FR-HenriNeural
+  de              -> de-DE-ConradNeural
+  ru              -> ru-RU-DmitryNeural
+  ar              -> ar-SA-HamedNeural
 ```
 
 ---
