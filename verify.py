@@ -9,6 +9,15 @@ import sys
 import shutil
 import tempfile
 
+# Auto re-exec into isolated venv if run from bare system python without dependencies
+venv_dir = os.path.expanduser("~/.local/share/ollama-speak/venv")
+venv_py = os.path.join(venv_dir, "bin", "python")
+if os.path.exists(venv_py) and sys.prefix != venv_dir:
+    try:
+        import kokoro
+    except ImportError:
+        os.execv(venv_py, [venv_py] + sys.argv)
+
 def test_audio_backends():
     print("[1/3] Checking OS audio playback engines...", end=" ", flush=True)
     found = []
