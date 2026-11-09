@@ -54,26 +54,64 @@ Zero cloud API calls, zero telemetry, zero corporate tracking, and zero accounts
 
 ## 🚀 Installation
 
-### Option 1 — Install via pip
+### Option 1 (Recommended) — One-Line Turnkey Installer
+Works automatically on fresh Linux, macOS, and WSL systems without requiring manual virtual environments or encountering PEP 668 system python locks.
+
+**Linux and macOS:**
 ```bash
-pip install --upgrade ollama-speak
+curl -fsSL https://raw.githubusercontent.com/AjarnSpencer/ollama-speak/main/install.sh | bash
 ```
 
-To install with Piper ONNX support:
-```bash
-pip install --upgrade "ollama-speak[all]"
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/AjarnSpencer/ollama-speak/main/install.ps1 | iex
 ```
 
-### Option 2 — Install from GitHub
+What the turnkey installer does:
+- Sets up an isolated virtual environment in `~/.local/share/ollama-speak/venv` (zero system pollution).
+- Symlinks `ollama-speak` and `ospeak` launchers into `~/.local/bin/`.
+- Configures user `PATH` if not already set.
+- Automatically pre-downloads local model weights so it works offline immediately.
+
+---
+
+### Option 2 — Install from GitHub with pipx or pip
+If you prefer managing Python CLI tools via `pipx` (recommended by Python Packaging Authority for standalone tools) or an active virtual environment:
+
+**Using pipx (Recommended for Python users):**
 ```bash
-pip install --upgrade git+https://github.com/AjarnSpencer/ollama-speak.git
+pipx install git+https://github.com/AjarnSpencer/ollama-speak.git
 ```
+
+**Using pip in a virtual environment:**
+```bash
+pip install git+https://github.com/AjarnSpencer/ollama-speak.git
+```
+
+---
+
+### Option 3 — Clone and Install Locally
+```bash
+git clone https://github.com/AjarnSpencer/ollama-speak.git
+cd ollama-speak
+./install.sh
+```
+
+---
 
 ### Pre-Download Local Models for 100% Offline Use
 ```bash
 ollama-speak --setup
 ```
 This downloads and caches the Kokoro-82M and Piper open weights into your local user directory. After this step, you can disconnect your computer from the internet completely.
+
+---
+
+### 📦 Publishing to PyPI (For Maintainers)
+To unlock global installation via `pip install ollama-speak` worldwide:
+1. Build distributions: `python3 -m build` (generates wheels and tarballs in `dist/`).
+2. Upload to PyPI: `twine upload dist/*` with your PyPI token.
+Once published, users can install directly via `pip install --upgrade ollama-speak`.
 
 ---
 
