@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# ollama-speak one-line installer for Linux and macOS
+# ollama-speak turnkey installer for Linux and macOS (100% Local Neural TTS)
 set -e
 
 echo "=================================================="
-echo " 🗣️ Installing ollama-speak (Multilingual Voice CLI)"
+echo " 🗣️ Installing ollama-speak (Local Neural Voice CLI)"
 echo "=================================================="
 
 # Check for Python 3.9+
@@ -16,17 +16,23 @@ else
     exit 1
 fi
 
-# Detect pipx or pip
-if command -v pipx >/dev/null 2>&1; then
-    echo "→ Installing via pipx..."
-    pipx install --upgrade git+https://github.com/AjarnSpencer/ollama-speak.git || pipx install --upgrade ollama-speak
+# Install dependencies and package
+if [ -f "pyproject.toml" ]; then
+    echo "→ Installing from local repository..."
+    $PY_BIN -m pip install --upgrade .
 else
-    echo "→ Installing via user pip..."
-    $PY_BIN -m pip install --user --upgrade git+https://github.com/AjarnSpencer/ollama-speak.git || $PY_BIN -m pip install --user --upgrade ollama-speak
+    echo "→ Installing from GitHub..."
+    $PY_BIN -m pip install --upgrade git+https://github.com/AjarnSpencer/ollama-speak.git
+fi
+
+# Pre-download local open weights
+if command -v ollama-speak >/dev/null 2>&1; then
+    echo "→ Pre-downloading open weights for 100% offline use..."
+    ollama-speak --setup || true
 fi
 
 echo "=================================================="
 echo " ✓ Installation complete!"
-echo " Run: 'ollama-speak \"Hello world\"'"
-echo " Or pipe: 'echo \"Reading from pipe\" | ollama-speak'"
+echo " Run: 'ollama-speak \"Hello from local AI\"'"
+echo " Or pipe: 'ollama run llama3 \"...\" | ollama-speak'"
 echo "=================================================="
