@@ -1,5 +1,6 @@
 # 🗣️ ollama-speak (`ospeak`)
 
+[![PyPI version](https://img.shields.io/pypi/v/ollama-speak.svg?color=blue)](https://pypi.org/project/ollama-speak/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-orange.svg)](https://ollama.ai/)
@@ -54,7 +55,26 @@ Zero cloud API calls, zero telemetry, zero corporate tracking, and zero accounts
 
 ## 🚀 Installation
 
-### Option 1 (Recommended) — One-Line Turnkey Installer
+### Option 1 — Install via PyPI (Recommended for Python users)
+`ollama-speak` is published to the official Python Package Index (PyPI). You can install it directly into any active Python environment:
+
+```bash
+pip install --upgrade ollama-speak
+```
+
+Or install in an isolated global CLI environment using `pipx` (recommended by the Python Packaging Authority for standalone command line utilities):
+```bash
+pipx install ollama-speak
+```
+
+To install with optional Piper ONNX support:
+```bash
+pip install --upgrade "ollama-speak[all]"
+```
+
+---
+
+### Option 2 — One-Line Turnkey Installer (Zero Configuration)
 Works automatically on fresh Linux, macOS, and WSL systems without requiring manual virtual environments or encountering PEP 668 system python locks.
 
 **Linux and macOS:**
@@ -68,29 +88,19 @@ irm https://raw.githubusercontent.com/AjarnSpencer/ollama-speak/main/install.ps1
 ```
 
 What the turnkey installer does:
-- Sets up an isolated virtual environment in `~/.local/share/ollama-speak/venv` (zero system pollution).
+- Sets up an isolated virtual environment in `~/.local/share/ollama-speak/venv` (zero system conflicts).
 - Symlinks `ollama-speak` and `ospeak` launchers into `~/.local/bin/`.
 - Configures user `PATH` if not already set.
 - Automatically pre-downloads local model weights so it works offline immediately.
 
 ---
 
-### Option 2 — Install from GitHub with pipx or pip
-If you prefer managing Python CLI tools via `pipx` (recommended by Python Packaging Authority for standalone tools) or an active virtual environment:
-
-**Using pipx (Recommended for Python users):**
-```bash
-pipx install git+https://github.com/AjarnSpencer/ollama-speak.git
-```
-
-**Using pip in a virtual environment:**
+### Option 3 — Install from GitHub
 ```bash
 pip install git+https://github.com/AjarnSpencer/ollama-speak.git
 ```
 
----
-
-### Option 3 — Clone and Install Locally
+Or clone and run locally:
 ```bash
 git clone https://github.com/AjarnSpencer/ollama-speak.git
 cd ollama-speak
@@ -107,11 +117,9 @@ This downloads and caches the Kokoro-82M and Piper open weights into your local 
 
 ---
 
-### 📦 Publishing to PyPI (For Maintainers)
-To unlock global installation via `pip install ollama-speak` worldwide:
-1. Build distributions: `python3 -m build` (generates wheels and tarballs in `dist/`).
-2. Upload to PyPI: `twine upload dist/*` with your PyPI token.
-Once published, users can install directly via `pip install --upgrade ollama-speak`.
+### 📦 PyPI Package Information (For Maintainers)
+- **PyPI Release:** [https://pypi.org/project/ollama-speak/](https://pypi.org/project/ollama-speak/)
+- **Release Automation:** Pushing a version tag (e.g. `git tag v1.1.1 && git push origin v1.1.1`) automatically triggers GitHub Actions (`.github/workflows/release.yml`) to build and publish updates to PyPI.
 
 ---
 
