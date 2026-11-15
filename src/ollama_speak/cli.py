@@ -7,9 +7,15 @@ Accepts text from arguments or STDIN pipes (e.g. `ollama-web "query" | ollama-sp
 import os
 import sys
 import argparse
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from .voice import (
     synthesize_and_speak,
     download_all_models,
+    normalize_output_path,
     KOKORO_VOICES,
     DEFAULT_KOKORO_VOICE
 )
@@ -66,15 +72,36 @@ def main():
 
     engine = "piper" if args.piper else ("kokoro" if args.kokoro else args.engine)
 
-    # 1. Check positional arguments
-    if args.text:
-        content = " ".join(args.text).strip()
-    # 2. Check STDIN pipe (e.g. ollama-web ... | ollama-speak)
-    elif not sys.stdin.isatty():
-        content = sys.stdin.read().strip()
+    raw_output = args.output
+    text_tokens = list(args.text)
+    stdin_content = ""
+    if not sys.stdin.isatty():
+        stdin_content = sys.stdin.read().strip()
+
+    # If piped with STDIN text and unquoted multi-word -o filename tokens,
+    # treat trailing positional tokens as part of the output filename.
+    if stdin_content:
+        if raw_output and text_tokens:
+            raw_output = " ".join([raw_output] + text_tokens).strip()
+            text_tokens = []
+        content = stdin_content
         # Always echo piped text to stdout so the human sees, reads, and can copy-paste it!
-        if content:
-            print(content, flush=True)
+        print(content, flush=True)
+    elif text_tokens:
+        # Handle unpiped unquoted -o filename ending in a known audio extension
+        audio_exts = (".wav", ".mp3", ".ogg", ".flac")
+        if raw_output and not os.path.splitext(raw_output)[1]:
+            ext_idx = next(
+                (i for i, tok in enumerate(text_tokens) if tok.lower().endswith(audio_exts)),
+                None
+            )
+            if ext_idx is not None:
+                raw_output = " ".join([raw_output] + text_tokens[:ext_idx + 1]).strip()
+                text_tokens = text_tokens[ext_idx + 1:]
+        content = " ".join(text_tokens).strip()
+        if not content:
+            parser.print_help()
+            sys.exit(0)
     else:
         parser.print_help()
         sys.exit(0)
@@ -82,7 +109,7 @@ def main():
     if not content:
         sys.exit(0)
 
-    output_path = os.path.expanduser(args.output) if args.output else None
+    output_path = normalize_output_path(raw_output, ".wav") if raw_output else None
 
     # Synthesize and speak using 100% local model
     success = synthesize_and_speak(

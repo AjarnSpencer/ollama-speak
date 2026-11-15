@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ollama-speak"
-version = "1.1.0"
+version = "1.1.1"
 description = "100% Local, Offline Multilingual Neural Text-to-Speech CLI for Ollama (Kokoro-82M & Piper)."
 readme = "README.md"
 authors = [

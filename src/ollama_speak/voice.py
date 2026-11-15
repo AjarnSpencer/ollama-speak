@@ -10,10 +10,25 @@ import sys
 import time
 import socket
 import shutil
+import warnings
 import urllib.request
 import tempfile
 import subprocess
 from pathlib import Path
+
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
+def normalize_output_path(output_path: str = None, default_ext: str = ".wav") -> str:
+    """Expand user paths and ensure saved audio files have a valid extension."""
+    if not output_path:
+        return None
+    expanded = os.path.expanduser(output_path.strip())
+    _, ext = os.path.splitext(expanded)
+    if not ext:
+        return f"{expanded}{default_ext}"
+    return expanded
 
 # Common Kokoro-82M open-weight voices
 KOKORO_VOICES = {
@@ -213,16 +228,23 @@ def synthesize_with_kokoro(
             if prefix in ("b", "a", "j", "z", "e", "f", "i", "p", "h"):
                 selected_lang = prefix
 
-    # Load local Kokoro pipeline
+    # Load local Kokoro pipeline (fall back to CPU if CUDA primary context is unavailable/full)
     try:
-        pipeline = KPipeline(lang_code=selected_lang, repo_id="hexgrad/Kokoro-82M")
+        try:
+            pipeline = KPipeline(lang_code=selected_lang, repo_id="hexgrad/Kokoro-82M")
+        except Exception as cuda_err:
+            err_lower = str(cuda_err).lower()
+            if "cuda" in err_lower or "out of memory" in err_lower:
+                pipeline = KPipeline(lang_code=selected_lang, repo_id="hexgrad/Kokoro-82M", device="cpu")
+            else:
+                raise
         generator = pipeline(text, voice=selected_voice, speed=speed)
         chunks = [a for _, _, a in generator]
         if not chunks:
             return False
 
         audio = np.concatenate(chunks)
-        save_file = output_path
+        save_file = normalize_output_path(output_path, ".wav")
         is_temp = False
         if not save_file:
             is_temp = True
@@ -260,7 +282,7 @@ def synthesize_with_piper(
         print("    Download it with: ollama-speak --setup", file=sys.stderr)
         return False
 
-    save_file = output_path
+    save_file = normalize_output_path(output_path, ".wav")
     is_temp = False
     if not save_file:
         is_temp = True
